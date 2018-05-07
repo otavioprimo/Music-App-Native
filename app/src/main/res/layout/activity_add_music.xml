@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".AddMusicActivity">
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/textLayoutArtista"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginLeft="16dp"
+        app:counterEnabled="true"
+        app:counterMaxLength="40"
+        >
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/artista"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/artista"
+            android:inputType="text"/>
+
+    </android.support.design.widget.TextInputLayout>
+
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/textLayoutMusica"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="16dp"
+        android:layout_marginLeft="16dp"
+        app:counterEnabled="true"
+        android:layout_below="@id/textLayoutArtista"
+        app:counterMaxLength="40">
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/musica"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/musica"
+
+            android:inputType="text"/>
+
+    </android.support.design.widget.TextInputLayout>
+
+   <LinearLayout
+       android:id="@+id/layoutFile"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_marginTop="16dp"
+       android:layout_marginLeft="16dp"
+       android:layout_below="@id/textLayoutMusica"
+       android:orientation="vertical">
+
+       <Button
+           android:id="@+id/btnArquivo"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="@string/selecione_uma_m_sica"
+           android:backgroundTint="@color/colorAccent"
+           android:textColor="@android:color/white" />
+
+       <TextView
+           android:id="@+id/txtArquivoSelecionado"
+           android:layout_width="match_parent"
+           android:layout_height="match_parent"
+           android:layout_marginLeft="3dp"
+           android:layout_marginTop="10dp"
+           android:text="@string/arquivo_selecionado"
+           android:visibility="invisible"/>
+
+   </LinearLayout>
+
+    <Button
+        android:id="@+id/btnSalvar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginLeft="16dp"
+        android:text="@string/salvar"
+        android:backgroundTint="@color/colorPrimary"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"
+        android:height="70dp"
+        android:layout_below="@id/layoutFile" />
+
+
+    <ProgressBar
+        android:id="@+id/progressFile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_below="@id/btnSalvar"
+        style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
+        android:visibility="invisible"/>
+
+    <TextView
+        android:id="@+id/porcentagem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/progressFile"
+        android:layout_centerHorizontal="true"
+        android:textSize="20sp"
+        android:visibility="invisible"/>
+
+</RelativeLayout>

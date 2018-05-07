@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">The Music Pirate</string>
+    <string name="artista">Nome do Artista/Banda</string>
+    <string name="musica">Nome da musica</string>
+    <string name="salvar">SALVAR</string>
+    <string name="selecione_uma_m_sica">SELECIONE UMA MÚSICA</string>
+    <string name="arquivo_selecionado">Arquivo Selecionado</string>
+    <string name="sem_musicas">Não encontramos nenhuma música</string>
+</resources>
