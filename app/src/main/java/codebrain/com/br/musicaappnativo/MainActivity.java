@@ -1,10 +1,6 @@
 package codebrain.com.br.musicaappnativo;
 
 import android.content.Intent;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.net.Uri;
-import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -12,20 +8,22 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import java.io.IOException;
+import com.example.jean.jcplayer.JcAudio;
+import com.example.jean.jcplayer.JcPlayerView;
+
+
 import java.util.ArrayList;
 import java.util.List;
 
 import codebrain.com.br.musicaappnativo.adapters.MusicListAdapter;
 import codebrain.com.br.musicaappnativo.models.Music;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -35,13 +33,16 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends AppCompatActivity {
 
     private FloatingActionButton fab;
+    private FloatingActionButton fabPlayer;
     private ProgressBar loading;
     private ListView musicList;
     private TextView txtSemMusicas;
     private ImageView imgRefresh;
     private SwipeRefreshLayout swipteRefreshLayout;
+    private JcPlayerView jcplayerView;
 
     private List<Music> musics;
+    private ArrayList<JcAudio> jcAudios;
 
     private int page = 1;
     private int limit = 10;
@@ -54,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
 
     private View viewPlaying;
 
-    private MediaPlayer myMediaPlayer;
     private int currentPosition;
     private Boolean isPlaying = false;
     private Boolean isLoading = false;
@@ -64,9 +64,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        myMediaPlayer = new MediaPlayer();
-        myMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        //Music Players
+        jcplayerView = findViewById(R.id.jcplayer);
 
+        //Pull to refresh
         swipteRefreshLayout = findViewById(R.id.swipeRefresh);
         swipteRefreshLayout.setColorSchemeColors(getResources().getColor(R.color.colorAccent));
 
@@ -88,6 +89,17 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(intent, 1000);
             }
         });
+        fabPlayer = findViewById(R.id.fabPlayer);
+        fabPlayer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (jcplayerView.getVisibility() == View.VISIBLE) {
+                    jcplayerView.setVisibility(View.INVISIBLE);
+                } else {
+                    jcplayerView.setVisibility(View.VISIBLE);
+                }
+            }
+        });
 
         //Pega as musicas da api
         Retrofit retrofit = new Retrofit.Builder()
@@ -107,24 +119,24 @@ public class MainActivity extends AppCompatActivity {
                 ImageView imgPlay = view.findViewById(R.id.imagePlay);
 
                 if (currentTrack != null && currentTrack.id == selectedMusic.id) { //Se for clicado na musica que esta tocando
-                    if (isPlaying) {
+                    if (jcplayerView.isPlaying()) {
                         imgPlay.setImageResource(R.drawable.ic_play);
-                        //pauseMusic();
-                        isPlaying = false;
+                        jcplayerView.pause();
+                        //isPlaying = false;
                     } else {
                         imgPlay.setImageResource(R.drawable.ic_pause);
-                        //resumeMusic();
-                        isPlaying = true;
+                        jcplayerView.continueAudio();
+                        //isPlaying = true;
                     }
                 } else { //Se for clicado em outra musica
                     if (viewPlaying != null) { //Se não for a primeira musica a ser tocada, salva a view da musica anterior
                         ImageView _previusView = viewPlaying.findViewById(R.id.imagePlay);
                         _previusView.setImageResource(R.drawable.ic_play);
-                        stopMusic();
                     }
 
+                    jcplayerView.playAudio(JcAudio.createFromURL(selectedMusic.artist + " - " + selectedMusic.name, selectedMusic.source));
+                    jcplayerView.createNotification(R.mipmap.ic_launcher_round);
                     imgPlay.setImageResource(R.drawable.ic_pause);
-                    //playMusic(selectedMusic.source);
                     currentTrack = selectedMusic;
                     viewPlaying = view;
                     isPlaying = true;
@@ -135,7 +147,6 @@ public class MainActivity extends AppCompatActivity {
         musicList.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
-
             }
 
             @Override
@@ -166,6 +177,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
     }
 
     @Override
@@ -221,6 +233,14 @@ public class MainActivity extends AppCompatActivity {
 
                     isLoading = false;
 
+                    jcAudios = new ArrayList<>();
+                    for (Music m : _musics) {
+                        jcAudios.add(JcAudio.createFromURL(m.artist + " - " + m.name, m.source));
+                    }
+
+                    jcplayerView.initPlaylist(jcAudios);
+                    jcplayerView.createNotification();
+
                 } else {
                     Log.d("API ERROR CODE:", "" + response.code());
                 }
@@ -254,10 +274,13 @@ public class MainActivity extends AppCompatActivity {
                     if (_musics.size() > 0) {
                         for (Music m : _musics) {
                             musics.add(m);
+                            jcAudios.add(JcAudio.createFromURL(m.artist + " - " + m.name, m.source));
                         }
 
+                        jcplayerView.initPlaylist(jcAudios);
+
                         //Move a lista para a posição antiga, sem isso o scroll da lista sobe pro inicio
-                        musicList.setSelectionFromTop(index,top);
+                        musicList.setSelectionFromTop(index, top);
 
                         isLoading = false;
                     }
@@ -288,48 +311,14 @@ public class MainActivity extends AppCompatActivity {
         imgRefresh.setVisibility(View.GONE);
     }
 
-    private void playMusic(String url) {
-        try {
-            myMediaPlayer.setDataSource(url);
-            myMediaPlayer.prepareAsync(); // might take long! (for buffering, etc)
-
-        } catch (IOException e) {
-            Toast.makeText(this, "mp3 not found", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-            Log.d("MusicPlayer Error", e.getMessage());
-        }
-
-        myMediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-            @Override
-            public boolean onError(MediaPlayer mp, int what, int extra) {
-                Toast.makeText(getApplicationContext(), "Falha ao reproduzir esta música", Toast.LENGTH_SHORT).show();
-                ImageView _previusView = viewPlaying.findViewById(R.id.imagePlay);
-                _previusView.setImageResource(R.drawable.ic_play);
-
-                mp.reset();
-                return false;
-            }
-        });
-    }
-
-    private void stopMusic() {
-        myMediaPlayer.stop();
-    }
-
-    private void pauseMusic() {
-        Toast.makeText(MainActivity.this, currentTrack.name.toString() + " Pausado", Toast.LENGTH_SHORT).show();
-        myMediaPlayer.pause();
-        currentPosition = myMediaPlayer.getCurrentPosition();
-    }
-
-    private void resumeMusic() {
-        Toast.makeText(MainActivity.this, "Voltando a tocar " + currentTrack.name.toString(), Toast.LENGTH_SHORT).show();
-        myMediaPlayer.seekTo(currentPosition);
-        myMediaPlayer.start();
-    }
-
     @Override
     public void onBackPressed() {
         this.moveTaskToBack(true);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        jcplayerView.kill();
     }
 }
