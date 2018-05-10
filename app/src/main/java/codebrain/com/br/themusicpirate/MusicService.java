@@ -2,7 +2,9 @@ package codebrain.com.br.themusicpirate;
 
 import java.util.List;
 
+import codebrain.com.br.themusicpirate.models.GraphResults;
 import codebrain.com.br.themusicpirate.models.Music;
+import codebrain.com.br.themusicpirate.models.Total;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -33,6 +35,12 @@ public interface MusicService {
 
     @GET("music/{id}")
     Call<Music> getMusicById(@Path("id") int id);
+
+    @GET("music/total")
+    Call<Total> getTotalMusics();
+
+    @GET("music/graph")
+    Call<List<GraphResults>> getGraph();
 
     @DELETE("music/{id}")
     Call<ResponseBody> deleteMusic(@Path("id") int id);

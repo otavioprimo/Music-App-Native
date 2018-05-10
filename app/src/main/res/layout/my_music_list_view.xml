@@ -39,33 +39,46 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/layoutData"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:orientation="vertical">
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
-        <TextView
-            android:id="@+id/data"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:id="@+id/layoutData"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="16dp"
-            android:text="08/05/2018"
-            android:textSize="12sp"
-            android:textAlignment="viewEnd"/>
+            android:layout_marginTop="16dp"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/hora"
-            android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/data"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="16dp"
+                android:text="08/05/2018"
+                android:textSize="12sp"
+                android:textAlignment="viewEnd"/>
+
+            <TextView
+                android:id="@+id/hora"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="16dp"
+                android:text="19:00"
+                android:textSize="12sp"
+                android:textAlignment="viewEnd"/>
+
+        </LinearLayout>
+
+
+        <ImageView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="16dp"
-            android:text="19:00"
-            android:textSize="12sp"
-            android:textAlignment="viewEnd"/>
+            android:src="@drawable/ic_menu_more"
+            android:layout_marginTop="16dp"/>
 
-    </LinearLayout>
 
 </LinearLayout>

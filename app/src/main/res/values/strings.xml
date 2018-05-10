@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">The Music Pirate</string>
+    <string name="app_name">Piratefy</string>
     <string name="artista">Nome do Artista/Banda</string>
     <string name="musica">Nome da musica</string>
     <string name="salvar">SALVAR</string>
@@ -16,4 +16,7 @@
     <string name="menu_pesquisar">Pesquisar</string>
     <string name="menu_config">Configurações</string>
     <string name="menu_sobre">Sobre</string>
+    <string name="total_acervo">Contamos com um acervo de 1000 músicas</string>
+    <string name="sobre_estatisticas">Veja nossas estatísticas</string>
+    <string name="contato">Não entre em contato conosco</string>
 </resources>

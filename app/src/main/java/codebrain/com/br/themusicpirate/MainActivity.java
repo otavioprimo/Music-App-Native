@@ -2,6 +2,7 @@ package codebrain.com.br.themusicpirate;
 
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -78,7 +79,8 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
             case R.id.menu_sobre: {
-                Toast.makeText(this, "Sobre em breve", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(this, AboutActivity.class);
+                startActivityForResult(intent, 1000);
                 break;
             }
         }
