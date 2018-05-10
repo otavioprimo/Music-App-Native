@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimary">#1f1f20</color>
+    <color name="colorPrimaryDark">#000000</color>
     <color name="colorAccent">#FF4081</color>
     <color name="disabledButton">#c2c2c2</color>
+    <color name="colorHint">#666666</color>
+    <color name="colorWhite">#ffffff</color>
+    <color name="foreground_material_light">#ffffff</color>
 </resources>
+    <!--3F51B5-->
+<!--303F9F-->

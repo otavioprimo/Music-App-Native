@@ -1,12 +1,19 @@
-package codebrain.com.br.musicaappnativo;
+package codebrain.com.br.themusicpirate.fragments;
 
-import android.content.Intent;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
+
+import android.app.SearchManager;
+import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageView;
@@ -17,23 +24,24 @@ import android.widget.TextView;
 import com.example.jean.jcplayer.JcAudio;
 import com.example.jean.jcplayer.JcPlayerView;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
-import codebrain.com.br.musicaappnativo.adapters.MusicListAdapter;
-import codebrain.com.br.musicaappnativo.models.Music;
-
+import codebrain.com.br.themusicpirate.MusicService;
+import codebrain.com.br.themusicpirate.R;
+import codebrain.com.br.themusicpirate.adapters.MusicListAdapter;
+import codebrain.com.br.themusicpirate.models.Music;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MainActivity extends AppCompatActivity {
+public class MusicsFragment extends Fragment {
 
-    private FloatingActionButton fab;
-    private FloatingActionButton fabPlayer;
+    private SearchView searchView;
+    private SearchManager searchManager;
+
     private ProgressBar loading;
     private ListView musicList;
     private TextView txtSemMusicas;
@@ -41,11 +49,15 @@ public class MainActivity extends AppCompatActivity {
     private SwipeRefreshLayout swipteRefreshLayout;
     private JcPlayerView jcplayerView;
 
-    private List<Music> musics;
+    public List<Music> musics;
+    public List<Music> filteredMusics;
     private ArrayList<JcAudio> jcAudios;
 
     private int page = 1;
     private int limit = 10;
+
+    private int pageFilter = 1;
+    private int limitFilter = 100;
 
     private MusicService service;
 
@@ -55,51 +67,38 @@ public class MainActivity extends AppCompatActivity {
 
     private View viewPlaying;
 
-    private int currentPosition;
-    private Boolean isPlaying = false;
     private Boolean isLoading = false;
 
+
+    public MusicsFragment() {
+        // Required empty public constructor
+    }
+
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+
+        setHasOptionsMenu(true);
+
+        View rootView = inflater.inflate(R.layout.fragment_musics, container, false);
 
         //Music Players
-        jcplayerView = findViewById(R.id.jcplayer);
+        jcplayerView = rootView.findViewById(R.id.jcplayer);
 
         //Pull to refresh
-        swipteRefreshLayout = findViewById(R.id.swipeRefresh);
+        swipteRefreshLayout = rootView.findViewById(R.id.swipeRefresh);
         swipteRefreshLayout.setColorSchemeColors(getResources().getColor(R.color.colorAccent));
 
         //Avisos de que não tem musicas
-        txtSemMusicas = findViewById(R.id.txtSemMusicas);
-        imgRefresh = findViewById(R.id.refresh);
+        txtSemMusicas = rootView.findViewById(R.id.txtSemMusicas);
+        imgRefresh = rootView.findViewById(R.id.refresh);
 
         //Lista de musicas
-        musicList = findViewById(R.id.musicList);
+        musicList = rootView.findViewById(R.id.musicList);
 
         //Loading
-        loading = findViewById(R.id.loading);
-
-        fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, AddMusicActivity.class);
-                startActivityForResult(intent, 1000);
-            }
-        });
-        fabPlayer = findViewById(R.id.fabPlayer);
-        fabPlayer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (jcplayerView.getVisibility() == View.VISIBLE) {
-                    jcplayerView.setVisibility(View.INVISIBLE);
-                } else {
-                    jcplayerView.setVisibility(View.VISIBLE);
-                }
-            }
-        });
+        loading = rootView.findViewById(R.id.loading);
 
         //Pega as musicas da api
         Retrofit retrofit = new Retrofit.Builder()
@@ -135,11 +134,10 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     jcplayerView.playAudio(JcAudio.createFromURL(selectedMusic.artist + " - " + selectedMusic.name, selectedMusic.source));
-                    jcplayerView.createNotification(R.mipmap.ic_launcher_round);
+                    jcplayerView.createNotification(R.drawable.ic_music);
                     imgPlay.setImageResource(R.drawable.ic_pause);
                     currentTrack = selectedMusic;
                     viewPlaying = view;
-                    isPlaying = true;
                 }
             }
         });
@@ -178,16 +176,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Boolean res = data.getBooleanExtra("newMusic", false);
-        if (res) {
-            page = 1;
-            getMusics(false);
-        }
+        // Inflate the layout for this fragment
+        return rootView;
     }
 
     //Pega as musicas da api e preenche na lista
@@ -239,7 +229,6 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     jcplayerView.initPlaylist(jcAudios);
-                    jcplayerView.createNotification();
 
                 } else {
                     Log.d("API ERROR CODE:", "" + response.code());
@@ -283,8 +272,11 @@ public class MainActivity extends AppCompatActivity {
                         musicList.setSelectionFromTop(index, top);
 
                         isLoading = false;
+                    } else {
+                        page -= 1;
                     }
                 } else {
+                    page -= 1;
                     Log.d("API ERROR CODE:", "" + response.code());
                 }
             }
@@ -298,13 +290,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void fillMusicList() {
         //Adapter para preencher a lista
-        adapter = new MusicListAdapter(musics, this);
+        adapter = new MusicListAdapter(musics, getActivity());
         musicList.setAdapter(adapter);
     }
 
     private void clearMusicList() {
         List<Music> _musics = new ArrayList<>();
-        adapter = new MusicListAdapter(_musics, this);
+        adapter = new MusicListAdapter(_musics, getActivity());
         musicList.setAdapter(adapter);
 
         txtSemMusicas.setVisibility(View.GONE);
@@ -312,13 +304,92 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onBackPressed() {
-        this.moveTaskToBack(true);
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+
+        MenuItem searchViewItem = menu.findItem(R.id.menu_pesquisar);
+        searchManager = (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
+        searchView = (SearchView) searchViewItem.getActionView();
+
+        searchView.setQueryHint("Pesquise uma música");
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
+        searchView.setIconifiedByDefault(true);
+
+        SearchView.OnQueryTextListener queryTextListener = new SearchView.OnQueryTextListener() {
+            public boolean onQueryTextChange(String newText) {
+                searchMusic(newText);
+                return true;
+            }
+
+            public boolean onQueryTextSubmit(String query) {
+                loading.setVisibility(View.GONE);
+                searchView.clearFocus();
+                return true;
+            }
+        };
+        searchView.setOnQueryTextListener(queryTextListener);
+
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                clearMusicList();
+                fillMusicList();
+                searchView.clearFocus();
+                loading.setVisibility(View.GONE);
+                return false;
+            }
+        });
+
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        jcplayerView.kill();
+    private void searchMusic(String text) {
+        loading.setVisibility(View.VISIBLE);
+        txtSemMusicas.setVisibility(View.GONE);
+        isLoading = true;
+        //Faz o request para a api
+        Call<List<Music>> requestMusics = service.searchMusic(text, pageFilter, limitFilter);
+
+        requestMusics.enqueue(new Callback<List<Music>>() {
+            @Override
+            public void onResponse(Call<List<Music>> call, Response<List<Music>> response) {
+
+                //Se der OK no request
+                if (response.isSuccessful()) {
+                    //Pega os dados do request
+                    final List<Music> _musics = response.body();
+
+                    filteredMusics = _musics;
+
+                    for (Music m : filteredMusics){
+                        Log.d("saasd",m.artist + " - " + m.name);
+                    }
+
+                    if (filteredMusics.size() > 0) {
+                        //Preenche a lista com as musicas
+                        adapter = new MusicListAdapter(filteredMusics, getActivity());
+                        musicList.setAdapter(adapter);
+                    } else {
+                        //Mostra um aviso que não encontrou musicas
+                        txtSemMusicas.setVisibility(View.VISIBLE);
+
+                        //Limpa a lista
+                        List<Music> _m = new ArrayList<>();
+                        adapter = new MusicListAdapter(_musics, getActivity());
+                        musicList.setAdapter(adapter);
+                    }
+
+                    isLoading = false;
+                    loading.setVisibility(View.GONE);
+                } else {
+                    loading.setVisibility(View.GONE);
+                    Log.d("API ERROR CODE:", "" + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Music>> call, Throwable t) {
+                Log.d("API ERROR", t.getMessage());
+            }
+        });
     }
 }

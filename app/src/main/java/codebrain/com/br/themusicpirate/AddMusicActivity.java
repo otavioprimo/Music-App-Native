@@ -1,25 +1,12 @@
-package codebrain.com.br.musicaappnativo;
+package codebrain.com.br.themusicpirate;
 
-import android.Manifest;
-import android.app.Activity;
-import android.content.ContentUris;
-import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
-import android.provider.DocumentsContract;
-import android.provider.MediaStore;
-import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatEditText;
-import android.util.Log;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -27,15 +14,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
-
 import java.io.File;
-import java.net.URISyntaxException;
 
-import codebrain.com.br.musicaappnativo.models.ResponseApi;
-import codebrain.com.br.musicaappnativo.utils.FileManager;
-import codebrain.com.br.musicaappnativo.utils.Permission;
-import codebrain.com.br.musicaappnativo.utils.ProgressRequestBody;
+import codebrain.com.br.themusicpirate.helpers.Preferences;
+import codebrain.com.br.themusicpirate.utils.FileManager;
+import codebrain.com.br.themusicpirate.utils.Permission;
+import codebrain.com.br.themusicpirate.utils.ProgressRequestBody;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -44,7 +28,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class AddMusicActivity extends AppCompatActivity implements ProgressRequestBody.UploadCallbacks{
 
@@ -83,7 +66,9 @@ public class AddMusicActivity extends AppCompatActivity implements ProgressReque
 
         service = retrofit.create(MusicService.class);
 
-        setTitle("New Music");
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle("Nova Música");
+        setSupportActionBar(toolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -127,7 +112,7 @@ public class AddMusicActivity extends AppCompatActivity implements ProgressReque
     private boolean validateForm() {
         if (artista.getText().toString().isEmpty()) {
             textLayoutArtista.setErrorEnabled(true);
-            textLayoutArtista.setError("Preencha com o nome do artista");
+            textLayoutArtista.setError("Preencha com o nome do artista/banda");
             return false;
         } else {
             textLayoutArtista.setErrorEnabled(false);
@@ -135,7 +120,7 @@ public class AddMusicActivity extends AppCompatActivity implements ProgressReque
 
         if (musica.getText().toString().isEmpty()) {
             textLayoutMusica.setErrorEnabled(true);
-            textLayoutMusica.setError("Preencha com o nome da banda");
+            textLayoutMusica.setError("Preencha com o nome da música");
             return false;
         } else {
             textLayoutMusica.setErrorEnabled(false);
@@ -173,11 +158,15 @@ public class AddMusicActivity extends AppCompatActivity implements ProgressReque
         //RequestBody body = RequestBody.create(MediaType.parse("audio/*"), file);
         ProgressRequestBody body = new ProgressRequestBody(file, this);
 
+        Preferences preferences = new Preferences(this);
+        String deviceId = preferences.getUserId();
+
         MultipartBody.Part _fileBody = MultipartBody.Part.createFormData("arquivo", file.getName(), body);
         RequestBody _artistaBody = RequestBody.create(MediaType.parse("text/plain"), _artista);
         RequestBody _musicaBody = RequestBody.create(MediaType.parse("text/plain"), _musica);
+        RequestBody _deviceidBody = RequestBody.create(MediaType.parse("text/plain"), deviceId);
 
-        Call<ResponseBody> req = service.uploadMusic(_fileBody, _artistaBody, _musicaBody);
+        Call<ResponseBody> req = service.uploadMusic(_fileBody, _artistaBody, _musicaBody,_deviceidBody);
 
         req.enqueue(new Callback<ResponseBody>() {
             @Override

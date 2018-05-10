@@ -1,4 +1,4 @@
-package codebrain.com.br.musicaappnativo;
+package codebrain.com.br.themusicpirate;
 
 import org.junit.Test;
 

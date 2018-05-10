@@ -1,4 +1,4 @@
-package codebrain.com.br.musicaappnativo.Service;
+package codebrain.com.br.themusicpirate.Service;
 
 import android.net.Uri;
 import android.util.Log;
@@ -6,8 +6,8 @@ import android.util.Log;
 import java.io.File;
 import java.util.List;
 
-import codebrain.com.br.musicaappnativo.MusicService;
-import codebrain.com.br.musicaappnativo.models.Music;
+import codebrain.com.br.themusicpirate.MusicService;
+import codebrain.com.br.themusicpirate.models.Music;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;

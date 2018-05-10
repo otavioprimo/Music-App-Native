@@ -1,4 +1,4 @@
-package codebrain.com.br.musicaappnativo.utils;
+package codebrain.com.br.themusicpirate.utils;
 
 import android.Manifest;
 import android.app.Activity;
